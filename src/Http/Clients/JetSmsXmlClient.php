@@ -65,9 +65,13 @@ class JetSmsXmlClient implements JetSmsClientInterface
      */
     public function sendShortMessage(ShortMessage $shortMessage)
     {
-        $payload = $this->generateSingleMessageBody($shortMessage);
+        $soapClient = new \SoapClient($this->url);
+        $soapResponse =  $soapClient->EnviaSMS( array_merge(
+            $this->generateAuthTags(),
+            $shortMessage->toArray()
+        ));
 
-        return new JetSmsXmlResponse($this->performCurlSession($payload));
+        return new JetSmsXmlResponse($soapResponse);
     }
 
     /**
@@ -134,9 +138,11 @@ class JetSmsXmlClient implements JetSmsClientInterface
      */
     private function generateAuthTags()
     {
-        return "<username>{$this->username}</username>"
-            . "<password>{$this->password}</password>"
-            . "<outbox-name>{$this->outboxName}</outbox-name>";
+        return [
+            'NumUsu' => $this->username,
+            'Senha'  => $this->password,
+            'SeuNum' => $this->outboxName,
+        ];
     }
 
     /**

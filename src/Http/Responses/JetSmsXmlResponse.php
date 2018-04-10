@@ -15,12 +15,10 @@ class JetSmsXmlResponse implements JetSmsResponseInterface
      * @var array
      */
     protected static $statuses = [
-        '00' => 'Success',
-        '10' => 'Invalid client credentials',
-        '11' => 'Insufficient funds',
-        '20' => 'Invalid xml',
-        '81' => 'Out of limits',
-        '90' => 'System error',
+        'OK'   => 'Mensagem aceita para transmissão',
+        'NOK'  => 'Mensagem não aceita para transmissão ou pendências financeiras',
+        'Erro' => 'Erro',
+        'NA'   => 'Sistema não disponível',
     ];
 
     /**
@@ -51,14 +49,8 @@ class JetSmsXmlResponse implements JetSmsResponseInterface
      */
     public function __construct($data)
     {
-        $response = explode(" ", $data);
-        $this->statusCode = array_shift($response);
-
-        if (! $this->isSuccessful()) {
-            $this->message = implode(' ', $response);
-        } else {
-            $this->groupId =  array_shift($response);
-        }
+        $this->statusCode = $data->EnviaSMSResult;
+        $this->message = self::$statuses[$this->statusCode];
     }
 
     /**
@@ -68,7 +60,7 @@ class JetSmsXmlResponse implements JetSmsResponseInterface
      */
     public function isSuccessful()
     {
-        return $this->statusCode === '00';
+        return $this->statusCode === 'OK';
     }
 
     /**
